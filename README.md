@@ -1,4 +1,4 @@
-# 🚀 ChartDekho - Advanced Cryptocurrency Tracker
+# 🚀 Kryptonix - Advanced Cryptocurrency Tracker
 
 A premium, modern, and responsive front-end cryptocurrency marketplace tracker that displays real-time asset prices, advanced TradingView charts, NFT statistics, and public Bitcoin holdings. Built with a stunning obsidian glassmorphism theme, relative routing, local storage caching, and a robust API rate-limit fallback layer.
 
@@ -34,7 +34,7 @@ A premium, modern, and responsive front-end cryptocurrency marketplace tracker t
 
 ## 📈 System Architecture & Data Flow
 
-ChartDekho utilizes a caching-first data flow to ensure fast response times and keep the app functional even during API outages:
+Kryptonix utilizes a caching-first data flow to ensure fast response times and keep the app functional even during API outages:
 
 ```mermaid
 flowchart TD
@@ -54,7 +54,7 @@ flowchart TD
 ## 📁 Project Structure
 
 ```
-ChartDekho/
+Kryptonix/
 │── index.html              # Main markets index portal (Assets, Exchanges, categories)
 │── LICENSE                 # Project license
 │── README.md               # Product documentation & flowcharts
@@ -82,7 +82,7 @@ ChartDekho/
 ## 🚀 How to Run Locally
 
 ### Option 1: Direct File Launch
-Because ChartDekho relies entirely on relative paths, you can run it directly:
+Because Kryptonix relies entirely on relative paths, you can run it directly:
 1. Clone the repository:
    ```bash
    git clone https://github.com/CODExGAMERZ/crypto-website.git
