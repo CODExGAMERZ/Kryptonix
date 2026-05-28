@@ -231,7 +231,7 @@ nav .right-section {
     gap: 30px;
 }
 
-nav .left-section .logo {
+.logo {
     font-family: var(--font-heading);
     font-weight: 800;
     font-size: 24px;
@@ -239,9 +239,37 @@ nav .left-section .logo {
     background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    transition: transform 0.3s ease;
+}
+
+.logo-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    object-fit: contain;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Blend logo into background in dark theme */
+#dark-theme .logo-img, body:not(#light-theme) .logo-img {
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.5));
+}
+
+#light-theme .logo-img {
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 0 3px rgba(124, 58, 237, 0.2));
+}
+
+.logo:hover .logo-img {
+    transform: scale(1.15) rotate(-10deg);
+}
+
+nav .left-section .logo {
+    /* Inherits layout from .logo */
 }
 
 nav .left-section .nav-links {
@@ -350,6 +378,7 @@ nav .right-section > i:hover {
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-main);
     transition: border-color 0.3s;
+    overflow-x: auto;
 }
 
 .trending .coins-wrapper .container:hover,
@@ -373,6 +402,7 @@ table th {
     border-bottom: 1px solid var(--border-color);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 table tr {
@@ -429,6 +459,7 @@ table tbody tr:hover td.table-fixed-column {
     border-radius: 20px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-main);
+    overflow-x: auto;
 }
 
 .tab-container .tabs {
@@ -535,12 +566,13 @@ td canvas {
 /* Detail Coin View Layout */
 .coin-container {
     margin: 40px;
-    display: flex;
+    display: grid;
+    grid-template-columns: 32fr 45fr 23fr;
     gap: 30px;
 }
 
 .coin-container .left-section {
-    width: 32%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 25px;
@@ -645,7 +677,7 @@ td canvas {
 }
 
 .coin-container .main-section {
-    width: 45%;
+    width: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -661,7 +693,7 @@ td canvas {
 }
 
 .coin-container .right-section {
-    width: 23%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 25px;
