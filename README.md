@@ -67,8 +67,7 @@ ChartDekho/
     ├── css/
     │   └── style.css       # Obsidian styling rules & glassmorphic system
     ├── images/
-    │   ├── about.jpg       # Corporate illustration
-    │   └── hero.webp       # Background layout graphic
+        └── about.png       # Generated custom workspace illustration
     └── js/
         ├── mockData.js     # Standalone local fallback JSON datasets
         ├── global.js       # Global statistics bar & menu operations
