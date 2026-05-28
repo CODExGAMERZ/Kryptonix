@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Kryptonix - A premium obsidian-themed cryptocurrency analytics platform. Track live assets, NFT trends, exchanges, and institutional BTC holdings with high-speed local caching.">
+    <meta name="description"
+        content="Kryptonix - A premium obsidian-themed cryptocurrency analytics platform. Track live assets, NFT trends, exchanges, and institutional BTC holdings with high-speed local caching.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" type="image/png" href="assets/images/logo.png">
@@ -22,7 +23,9 @@
     <!-- Mobile Navigation Overlay Drawer -->
     <div class="overlay">
         <button id="closeMenu" aria-label="Close menu"><i class="ri-close-circle-line"></i></button>
-        <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Kryptonix Logo" style="width: 32px; height: 32px; border-radius: 8px; vertical-align: middle; margin-right: 8px;"> Kryptonix</a>
+        <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Kryptonix Logo"
+                style="width: 32px; height: 32px; border-radius: 8px; vertical-align: middle; margin-right: 8px;">
+            Kryptonix</a>
         <div class="nav-links">
             <a href="index.html" class="active">Home</a>
             <a href="pages/charts.html">Charts</a>
@@ -44,7 +47,8 @@
         <div class="global">
             <p><i class="ri-coins-line"></i> Coins: <b id="coins-count">N/A</b></p>
             <p><i class="ri-exchange-funds-line"></i> Exchanges: <b id="exchanges-count">N/A</b></p>
-            <p><i class="ri-line-chart-line"></i> Market Cap: <span><b id="marketCap">N/A</b> <span id="marketCapChange">N/A <i class="ri-arrow-down-s-fill"></i></span></span></p>
+            <p><i class="ri-line-chart-line"></i> Market Cap: <span><b id="marketCap">N/A</b> <span
+                        id="marketCapChange">N/A <i class="ri-arrow-down-s-fill"></i></span></span></p>
             <p><i class="ri-funds-line"></i> 24H Vol: <b id="volume">N/A</b></p>
             <p><i class="ri-pie-chart-line"></i> Dominance: <b id="dominance">BTC N/A% - ETH N/A%</b></p>
         </div>
@@ -53,7 +57,9 @@
         <nav>
             <div class="left-section">
                 <button id="openMenu" aria-label="Open menu"><i class="ri-menu-line"></i></button>
-                <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Kryptonix Logo" style="width: 32px; height: 32px; border-radius: 8px; vertical-align: middle; margin-right: 8px;"> Kryptonix.</a>
+                <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Kryptonix Logo"
+                        style="width: 32px; height: 32px; border-radius: 8px; vertical-align: middle; margin-right: 8px;">
+                    Kryptonix.</a>
                 <div class="nav-links">
                     <a href="index.html" class="active">Home</a>
                     <a href="pages/charts.html">Charts</a>
@@ -98,9 +104,12 @@
         <!-- Interactive Market Tabs Section -->
         <div class="tab-container">
             <div class="tabs">
-                <button class="tab-button active" onclick="openTab(event, 'tab1')"><i class="ri-apps-2-line"></i> Assets</button>
-                <button class="tab-button" onclick="openTab(event, 'tab2')"><i class="ri-arrow-left-right-line"></i> Exchanges</button>
-                <button class="tab-button" onclick="openTab(event, 'tab3')"><i class="ri-exchange-2-line"></i> Categories</button>
+                <button class="tab-button active" onclick="openTab(event, 'tab1')"><i class="ri-apps-2-line"></i>
+                    Assets</button>
+                <button class="tab-button" onclick="openTab(event, 'tab2')"><i class="ri-arrow-left-right-line"></i>
+                    Exchanges</button>
+                <button class="tab-button" onclick="openTab(event, 'tab3')"><i class="ri-exchange-2-line"></i>
+                    Categories</button>
                 <button class="tab-button" onclick="openTab(event, 'tab4')"><i class="ri-btc-line"></i> Holders</button>
             </div>
             <div class="tab-content" id="tab1">
@@ -138,7 +147,8 @@
     </footer>
 
     <!-- Smooth Back To Top Button -->
-    <button onclick="scrollToTop()" id="scrollTop" aria-label="Scroll to top"><i class="ri-arrow-up-s-line"></i></button>
+    <button onclick="scrollToTop()" id="scrollTop" aria-label="Scroll to top"><i
+            class="ri-arrow-up-s-line"></i></button>
 
     <!-- Script Assets -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
