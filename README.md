@@ -5,12 +5,14 @@ A premium, modern, and responsive front-end cryptocurrency marketplace tracker t
 ---
 
 ## 🔗 Live Links
+
 - **Live Web Page Demo:** [https://codexgamerz.github.io/crypto-website/](https://codexgamerz.github.io/crypto-website/)
 - **GitHub Code Repository:** [https://github.com/CODExGAMERZ/crypto-website](https://github.com/CODExGAMERZ/crypto-website)
 
 ---
 
 ## ✨ Features Checklist
+
 - [x] **Premium Dark-First Visuals:** Implements modern glassmorphism panels, custom styled scrollbars, smooth transitions, and glowing indicator badges.
 - [x] **API Fallback Demo Mode:** Integrated a comprehensive mock dataset (`mockData.js`). If the CoinGecko API returns a rate-limit error (HTTP 429), the tracker switches to demo mode and displays a warning banner instead of breaking the layout.
 - [x] **Double-Level Caching:** Standardized a 5-minute local storage cache across all pages (Global data, asset lists, detail pages) to minimize external network requests and prevent rate limits.
@@ -23,6 +25,7 @@ A premium, modern, and responsive front-end cryptocurrency marketplace tracker t
 ---
 
 ## 🛠 Tech Stack
+
 - **HTML5** – Structured semantic elements.
 - **CSS3 (Vanilla)** – Custom design tokens, glassmorphic filters, and layouts (Flexbox & Grid).
 - **JavaScript (ES6)** – Handles network integrations, local storage caching, and mock fallbacks.
@@ -82,7 +85,9 @@ Kryptonix/
 ## 🚀 How to Run Locally
 
 ### Option 1: Direct File Launch
+
 Because Kryptonix relies entirely on relative paths, you can run it directly:
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/CODExGAMERZ/crypto-website.git
@@ -91,7 +96,9 @@ Because Kryptonix relies entirely on relative paths, you can run it directly:
 3. Double-click `index.html` to open it in any web browser.
 
 ### Option 2: Local Web Server (Recommended)
+
 To prevent CORS policies on advanced browser scripts, host it on a local static server:
+
 1. If you have NodeJS installed, run:
    ```bash
    npx serve .
@@ -101,9 +108,11 @@ To prevent CORS policies on advanced browser scripts, host it on a local static 
 ---
 
 ## 🚀 Deployment
-This project is configured for continuous deployment using **GitHub Pages** directly from the `main` branch. 
+
+This project is configured for continuous deployment using **GitHub Pages** directly from the `main` branch.
 
 To host your own copy:
+
 1. Fork this repository.
 2. Go to **Settings > Pages** on your GitHub repo.
 3. Set the source build to the `/root` of the `main` branch and click **Save**.
@@ -111,6 +120,7 @@ To host your own copy:
 ---
 
 ## 👤 Author
+
 - **CODExGAMERZ** – [GitHub Profile](https://github.com/CODExGAMERZ)
 
-⭐ *If you find this project useful, consider giving it a star!*
+⭐ _If you find this project useful, consider giving it a star!_
