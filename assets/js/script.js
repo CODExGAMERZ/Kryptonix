@@ -34,7 +34,11 @@ function openTab(event, tabName) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelector(".tab-button").click();
+    // Click the first tab to load asset data
+    const firstTabBtn = document.querySelector(".tab-button");
+    if (firstTabBtn) {
+        firstTabBtn.click();
+    }
     fetchData();
 });
 
@@ -48,7 +52,6 @@ async function fetchData() {
 async function fetchAndDisplay(url, idsToToggle, displayFunction, tabName = null, localKey) {
     idsToToggle.forEach(id => {
         const errorElement = document.getElementById(`${id}-error`);
-
         if (errorElement) {
             errorElement.style.display = 'none';
         }
@@ -67,7 +70,7 @@ async function fetchAndDisplay(url, idsToToggle, displayFunction, tabName = null
     } else {
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error('API limit reached');
+            if (!response.ok) throw new Error(`API returned status ${response.status}`);
             const data = await response.json();
             idsToToggle.forEach(id => toggleSpinner(id, `${id}-spinner`, false));
             displayFunction(data);
@@ -76,38 +79,85 @@ async function fetchAndDisplay(url, idsToToggle, displayFunction, tabName = null
                 tabDataLoaded[tabName] = true;
             }
         } catch (error) {
-            idsToToggle.forEach(id => {
-                toggleSpinner(id, `${id}-spinner`, false);
-                document.getElementById(`${id}-error`).style.display = 'block';
-            });
-            if (tabName) {
-                tabDataLoaded[tabName] = false;
+            console.warn(`Failed to fetch API from CoinGecko for ${localKey}. Falling back to demo data.`, error);
+            
+            // Show floating Demo Banner at top of page
+            const banner = document.getElementById('demo-banner');
+            if (banner) {
+                banner.classList.remove('hidden');
+            }
+
+            // Map local storage key to MOCK_DATA key
+            let mockKey = '';
+            if (localKey === 'Trending_data') mockKey = 'trending';
+            else if (localKey === 'Crypto_Data') mockKey = 'markets';
+            else if (localKey === 'Exchanges_Data') mockKey = 'exchanges';
+            else if (localKey === 'Categories_Data') mockKey = 'categories';
+            else if (localKey === 'Companies_Data') mockKey = 'companies';
+
+            if (mockKey && window.MOCK_DATA && window.MOCK_DATA[mockKey]) {
+                const fallbackData = window.MOCK_DATA[mockKey];
+                idsToToggle.forEach(id => toggleSpinner(id, `${id}-spinner`, false));
+                displayFunction(fallbackData);
+                if (tabName) {
+                    tabDataLoaded[tabName] = true;
+                }
+            } else {
+                idsToToggle.forEach(id => {
+                    toggleSpinner(id, `${id}-spinner`, false);
+                    const errorElement = document.getElementById(`${id}-error`);
+                    if (errorElement) {
+                        errorElement.style.display = 'block';
+                    }
+                });
+                if (tabName) {
+                    tabDataLoaded[tabName] = false;
+                }
             }
         }
     }
 }
 
 function displayTrends(data) {
-    displayTrendCoins(data.coins.slice(0, 5));
-    displayTrendNfts(data.nfts.slice(0, 5));
+    if (data.coins) displayTrendCoins(data.coins.slice(0, 5));
+    if (data.nfts) displayTrendNfts(data.nfts.slice(0, 5));
 }
 
 function displayTrendCoins(coins) {
     const coinsList = document.getElementById('coins-list');
+    if (!coinsList) return;
     coinsList.innerHTML = '';
     const table = createTable(['Coin', 'Price', 'Market Cap', 'Volume', '24h%']);
 
     coins.forEach(coin => {
         const coinData = coin.item;
         const row = document.createElement('tr');
+        
+        // Clean prices
+        let price = coinData.price_btc;
+        if (typeof price === 'number') {
+            price = price.toFixed(6) + ' BTC';
+        } else if (typeof price === 'string') {
+            price = parseFloat(price).toFixed(6) + ' BTC';
+        } else {
+            price = 'N/A';
+        }
+
+        // Determine price change class
+        const changePercent = coinData.data.price_change_percentage_24h.usd;
+        const isPositive = changePercent >= 0;
+        const changeText = typeof changePercent === 'number' ? changePercent.toFixed(2) + '%' : 'N/A';
+        const changeClass = isPositive ? 'green' : 'red';
+        const arrow = isPositive ? 'ri-arrow-up-s-fill' : 'ri-arrow-down-s-fill';
+
         row.innerHTML = `
             <td class="name-column table-fixed-column"><img src="${coinData.thumb}" alt="${coinData.name}"> ${coinData.name} <span>(${coinData.symbol.toUpperCase()})</span></td>
-            <td>${parseFloat(coinData.price_btc).toFixed(6)}</td>
-            <td>$${coinData.data.market_cap}</td>
-            <td>$${coinData.data.total_volume}</td>
-            <td class="${coinData.data.price_change_percentage_24h.usd >= 0 ? 'green' : 'red'}">${coinData.data.price_change_percentage_24h.usd.toFixed(2)}%</td>
+            <td>${price}</td>
+            <td>${coinData.data.market_cap || 'N/A'}</td>
+            <td>${coinData.data.total_volume || 'N/A'}</td>
+            <td class="${changeClass}"><span><i class="${arrow} ${changeClass}"></i> ${changeText}</span></td>
         `;
-        row.onclick = () => window.location.href = `../../pages/coin.html?coin=${coinData.id}`;
+        row.onclick = () => window.location.href = `pages/coin.html?coin=${coinData.id}`;
         table.appendChild(row);
     });
     coinsList.appendChild(table);
@@ -115,17 +165,23 @@ function displayTrendCoins(coins) {
 
 function displayTrendNfts(nfts) {
     const nftsList = document.getElementById('nfts-list');
+    if (!nftsList) return;
     nftsList.innerHTML = '';
     const table = createTable(['NFT', 'Market', 'Price', '24h Vol', '24h%']);
 
     nfts.forEach(nft => {
         const row = document.createElement('tr');
+        const changePercent = parseFloat(nft.data.floor_price_in_usd_24h_percentage_change);
+        const isPositive = changePercent >= 0;
+        const changeClass = isPositive ? 'green' : 'red';
+        const arrow = isPositive ? 'ri-arrow-up-s-fill' : 'ri-arrow-down-s-fill';
+
         row.innerHTML = `
             <td class="name-column table-fixed-column"><img src="${nft.thumb}" alt="${nft.name}"> ${nft.name} <span>(${nft.symbol.toUpperCase()})</span></td>
             <td>${nft.native_currency_symbol.toUpperCase()}</td>
-            <td>$${nft.data.floor_price}</td>
-            <td>$${nft.data.h24_volume}</td>
-            <td class="${parseFloat(nft.data.floor_price_in_usd_24h_percentage_change) >= 0 ? 'green' : 'red'}">${parseFloat(nft.data.floor_price_in_usd_24h_percentage_change).toFixed(2)}%</td>
+            <td>${nft.data.floor_price}</td>
+            <td>${nft.data.h24_volume}</td>
+            <td class="${changeClass}"><span><i class="${arrow} ${changeClass}"></i> ${changePercent.toFixed(2)}%</span></td>
         `;
         table.appendChild(row);
     });
@@ -134,34 +190,47 @@ function displayTrendNfts(nfts) {
 
 function displayAssets(data) {
     const cryptoList = document.getElementById('asset-list');
+    if (!cryptoList) return;
     cryptoList.innerHTML = '';
     const table = createTable(['Rank', 'Coin', 'Price', '24h Price', '24h Price %', 'Total Vol', 'Market Cap', 'Last 7 Days'], 1);
 
     const sparklineData = [];
     data.forEach(asset => {
         const row = document.createElement('tr');
+        const changePercent = asset.price_change_percentage_24h;
+        const isPositive = changePercent >= 0;
+        const changeClass = isPositive ? 'green' : 'red';
+        const arrow = isPositive ? 'ri-arrow-up-s-fill' : 'ri-arrow-down-s-fill';
+
         row.innerHTML = `
             <td class="rank">${asset.market_cap_rank}</td>
             <td class="name-column table-fixed-column"><img src="${asset.image}" alt="${asset.name}"> ${asset.name} <span>(${asset.symbol.toUpperCase()})</span></td>
-            <td>$${asset.current_price.toFixed(2)}</td>
-            <td class="${asset.price_change_percentage_24h >= 0 ? 'green' : 'red'}">$${asset.price_change_24h.toFixed(2)}</td>
-            <td class="${asset.price_change_percentage_24h >= 0 ? 'green' : 'red'}">${asset.price_change_percentage_24h.toFixed(2)}%</td>
+            <td>$${asset.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td class="${changeClass}">$${asset.price_change_24h ? asset.price_change_24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</td>
+            <td class="${changeClass}"><span><i class="${arrow} ${changeClass}"></i> ${changePercent ? changePercent.toFixed(2) : '0.00'}%</span></td>
             <td>$${asset.total_volume.toLocaleString()}</td>
             <td>$${asset.market_cap.toLocaleString()}</td>
-            <td><canvas id="chart-${asset.id}" width="100" height="50"></canvas></td>
+            <td><canvas id="chart-${asset.id}" width="100" height="40"></canvas></td>
         `;
         table.appendChild(row);
-        sparklineData.push({
-            id: asset.id,
-            sparkline: asset.sparkline_in_7d.price,
-            color: asset.sparkline_in_7d.price[0] <= asset.sparkline_in_7d.price[asset.sparkline_in_7d.price.length - 1] ? 'green' : 'red'
-        });
-        row.onclick = () => window.location.href = `../../pages/coin.html?coin=${asset.id}`;
+        
+        if (asset.sparkline_in_7d && asset.sparkline_in_7d.price) {
+            sparklineData.push({
+                id: asset.id,
+                sparkline: asset.sparkline_in_7d.price,
+                color: asset.sparkline_in_7d.price[0] <= asset.sparkline_in_7d.price[asset.sparkline_in_7d.price.length - 1] ? '#10B981' : '#EF4444'
+            });
+        }
+        
+        row.onclick = () => window.location.href = `pages/coin.html?coin=${asset.id}`;
     });
     cryptoList.appendChild(table);
 
+    // Draw sparklines
     sparklineData.forEach(({ id, sparkline, color }) => {
-        const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+        const canvas = document.getElementById(`chart-${id}`);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -170,29 +239,22 @@ function displayAssets(data) {
                     {
                         data: sparkline,
                         borderColor: color,
+                        borderWidth: 1.5,
                         fill: false,
                         pointRadius: 0,
-                        borderWidth: 1
+                        tension: 0.4
                     }
                 ]
             },
             options: {
                 responsive: false,
                 scales: {
-                    x: {
-                        display: false
-                    },
-                    y: {
-                        display: false
-                    }
+                    x: { display: false },
+                    y: { display: false }
                 },
                 plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        enabled: false
-                    }
+                    legend: { display: false },
+                    tooltip: { enabled: false }
                 }
             }
         });
@@ -201,6 +263,7 @@ function displayAssets(data) {
 
 function displayExchanges(data) {
     const exchangeList = document.getElementById('exchange-list');
+    if (!exchangeList) return;
     exchangeList.innerHTML = '';
     const table = createTable(['Rank', 'Exchange', 'Trust Score', '24h Trade', '24h Trade (Normal)', 'Country', 'Website', 'Year'], 1);
 
@@ -211,11 +274,15 @@ function displayExchanges(data) {
         row.innerHTML = `
             <td class="rank">${exchange.trust_score_rank}</td>
             <td class="name-column table-fixed-column"><img src="${exchange.image}" alt="${exchange.name}"> ${exchange.name}</td>
-            <td>${exchange.trust_score}</td>
-            <td>$${exchange.trade_volume_24h_btc.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} BTC</td>
-            <td>$${exchange.trade_volume_24h_btc_normalized.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} BTC</td>
+            <td>
+                <span style="background: rgba(16, 185, 129, 0.15); color: #10B981; padding: 4px 8px; border-radius: 8px; font-weight: 700;">
+                    ${exchange.trust_score}/10
+                </span>
+            </td>
+            <td>${exchange.trade_volume_24h_btc.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} BTC</td>
+            <td>${exchange.trade_volume_24h_btc_normalized.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} BTC</td>
             <td class="name-column">${exchange.country || 'N/A'}</td>
-            <td class="name-column">${exchange.url}</td>
+            <td><a href="${exchange.url}" target="_blank" class="green" style="font-weight: 600; text-decoration: underline;">Link <i class="ri-external-link-line"></i></a></td>
             <td>${exchange.year_established || 'N/A'}</td>
         `;
         table.appendChild(row);
@@ -224,39 +291,50 @@ function displayExchanges(data) {
 }
 
 function displayCategories(data) {
-    const catagoriesList = document.getElementById('category-list');
-    catagoriesList.innerHTML = '';
-    const table = createTable(['Top Coins', 'Category', 'Market Cap', '24h Market Cap', '24h Volume'], 1);
+    const categoriesList = document.getElementById('category-list');
+    if (!categoriesList) return;
+    categoriesList.innerHTML = '';
+    const table = createTable(['Top Coins', 'Category', 'Market Cap', '24h Market Cap %', '24h Volume'], 1);
 
     data = data.slice(0, 20);
 
     data.forEach(category => {
         const row = document.createElement('tr');
+        const capChange = category.market_cap_change_24h;
+        const isPositive = capChange >= 0;
+        const changeClass = isPositive ? 'green' : 'red';
+        const arrow = isPositive ? 'ri-arrow-up-s-fill' : 'ri-arrow-down-s-fill';
+
         row.innerHTML = `
-            <td>${category.top_3_coins.map(coin => `<img src="${coin}" alt="coin">`).join('')}</td>
+            <td>
+                <div style="display: flex; gap: 4px;">
+                    ${category.top_3_coins.map(coin => `<img src="${coin}" alt="coin" style="width: 20px; height: 20px; border-radius: 50%;">`).join('')}
+                </div>
+            </td>
             <td class="name-column table-fixed-column">${category.name}</td>
-            <td>$${category.market_cap ? category.market_cap.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : 'N/A'}</td>
-            <td class="${category.market_cap_change_24h >= 0 ? 'green' : 'red'}">${category.market_cap_change_24h ? category.market_cap_change_24h.toFixed(3) : "0"}%</td>
-            <td>$${category.volume_24h ? category.volume_24h.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : "N/A"}</td>
+            <td>$${category.market_cap ? category.market_cap.toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A'}</td>
+            <td class="${changeClass}"><span><i class="${arrow} ${changeClass}"></i> ${capChange ? capChange.toFixed(2) : "0.00"}%</span></td>
+            <td>$${category.volume_24h ? category.volume_24h.toLocaleString(undefined, { maximumFractionDigits: 0 }) : "N/A"}</td>
         `;
         table.appendChild(row);
     });
-    catagoriesList.appendChild(table);
+    categoriesList.appendChild(table);
 }
 
 function displayCompanies(data) {
     const companyList = document.getElementById('company-list');
+    if (!companyList) return;
     companyList.innerHTML = '';
-    const table = createTable(['Company', 'Total BTC', 'Entry Value', 'Total Current Value', 'Total %']);
+    const table = createTable(['Company', 'Total BTC', 'Entry Value', 'Total Current Value', 'Percentage of Supply']);
 
     data.companies.forEach(company => {
         const row = document.createElement('tr');
         row.innerHTML = `
-           <td class="name-column table-fixed-column">${company.name}</td>
-            <td>${company.total_holdings}</td>
-            <td>${company.total_entry_value_usd}</td>
-            <td>${company.total_current_value_usd}</td>
-            <td class="${company.percentage_of_total_supply >= 0 ? 'green' : 'red'}">${company.percentage_of_total_supply}%</td>
+            <td class="name-column table-fixed-column">${company.name}</td>
+            <td>${company.total_holdings.toLocaleString()} BTC</td>
+            <td>$${company.total_entry_value_usd.toLocaleString()}</td>
+            <td>$${company.total_current_value_usd.toLocaleString()}</td>
+            <td class="green" style="font-weight: 600;">${company.percentage_of_total_supply}%</td>
         `;
         table.appendChild(row);
     });

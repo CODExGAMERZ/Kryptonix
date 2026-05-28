@@ -4,71 +4,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detailed cryptocurrency statistics, real-time interactive charts, trading history, and links.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <title>Crypto Marketplace | TechVoids</title>
+    <title>Asset Details | ChartDekho</title>
 </head>
 
 <body>
 
-    <div class="overlay">
-        <button id="closeMenu"><i class="ri-close-circle-line"></i></button>
+    <!-- Fallback Warning Banner -->
+    <div id="demo-banner" class="demo-banner hidden">
+        <i class="ri-error-warning-line"></i>
+        <span>Notice: CoinGecko API limit reached. Operating in Demo Mode with cached data.</span>
+    </div>
 
+    <!-- Mobile Drawer Overlay Menu -->
+    <div class="overlay">
+        <button id="closeMenu" aria-label="Close menu"><i class="ri-close-circle-line"></i></button>
+        <a href="../index.html" class="logo"><i class="ri-copper-coin-line"></i> ChartDekho</a>
         <div class="nav-links">
-            <a href="/index.html">Home</a>
-            <a href="/pages/charts.html">Charts</a>
-            <a href="/pages/search.html">Search</a>
-            <a href="/pages/about.html">About US</a>
+            <a href="../index.html">Home</a>
+            <a href="charts.html">Charts</a>
+            <a href="search.html">Search</a>
+            <a href="about.html">About US</a>
         </div>
 
         <div class="social-icons">
-            <a href="#"><i class="ri-youtube-line"></i></a>
-            <a href="#"><i class="ri-telegram-line"></i></a>
-            <a href="#"><i class="ri-github-line"></i></a>
-            <a href="#"><i class="ri-discord-line"></i></a>
+            <a href="#" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+            <a href="#" aria-label="Telegram"><i class="ri-telegram-line"></i></a>
+            <a href="#" aria-label="GitHub"><i class="ri-github-line"></i></a>
+            <a href="#" aria-label="Discord"><i class="ri-discord-line"></i></a>
         </div>
-
     </div>
 
     <div class="main">
 
+        <!-- Global statistics ticker -->
         <div class="global">
-            <p>Coins: <b id="coins-count">N/A</b></p>
-            <p>Exchanges: <b id="exchanges-count">N/A</b></p>
-            <p>Market Cap: <span><b id="marketCap">N/A</b> <span id="marketCapChange">N/A <i
-                            class="ri-arrow-down-s-fill"></i></span></span></p>
-            <p>24H Vol: <b id="volume">N/A</b></p>
-            <p>Dominance: <b id="dominance">BTC N/A% - ETH N/A%</b></p>
+            <p><i class="ri-coins-line"></i> Coins: <b id="coins-count">N/A</b></p>
+            <p><i class="ri-exchange-funds-line"></i> Exchanges: <b id="exchanges-count">N/A</b></p>
+            <p><i class="ri-line-chart-line"></i> Market Cap: <span><b id="marketCap">N/A</b> <span id="marketCapChange">N/A <i class="ri-arrow-down-s-fill"></i></span></span></p>
+            <p><i class="ri-funds-line"></i> 24H Vol: <b id="volume">N/A</b></p>
+            <p><i class="ri-pie-chart-line"></i> Dominance: <b id="dominance">BTC N/A% - ETH N/A%</b></p>
         </div>
 
+        <!-- Navigation Bar -->
         <nav>
             <div class="left-section">
-                <button id="openMenu"><i class="ri-menu-line"></i></button>
-                <a href="#" class="logo">Logo.</a>
+                <button id="openMenu" aria-label="Open menu"><i class="ri-menu-line"></i></button>
+                <a href="../index.html" class="logo"><i class="ri-copper-coin-line"></i> ChartDekho.</a>
                 <div class="nav-links">
-                    <a href="/index.html">Home</a>
-                    <a href="/pages/charts.html">Charts</a>
-                    <a href="/pages/search.html">Search</a>
-                    <a href="/pages/about.html">About US</a>
+                    <a href="../index.html">Home</a>
+                    <a href="charts.html">Charts</a>
+                    <a href="search.html">Search</a>
+                    <a href="about.html">About US</a>
                 </div>
             </div>
             <div class="right-section">
-                <form class="search" id="searchForm">
+                <form class="search" id="searchForm" role="search">
                     <i class="ri-search-line"></i>
-                    <input type="text" id="searchInput" placeholder="Search for an asset..." required
-                        autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Search asset..." required autocomplete="off">
                 </form>
-                <i id="theme-toggle" class="ri-sun-line"></i>
+                <i id="theme-toggle" class="ri-moon-line" aria-label="Toggle theme"></i>
             </div>
         </nav>
 
+        <!-- Detailed Coin Container -->
         <div class="coin-container">
             <div class="left-section">
                 <div class="ticker">
                     <div class="tradingview-widget-container" id="ticker-widget"></div>
                 </div>
                 <h3>Statistics</h3>
-                <div class="coin-info"></div>
+                <div class="coin-info">
+                    <!-- Loaded dynamically -->
+                </div>
             </div>
 
             <div class="main-section">
@@ -77,60 +87,36 @@
                 </div>
             </div>
 
-            <div class="right-section"></div>
-
+            <div class="right-section">
+                <!-- Loaded dynamically -->
+            </div>
         </div>
 
+        <!-- Coin Description -->
         <div class="coin-desc">
             <h3>About Asset</h3>
             <p id="coin-desc-p">
-                Bitcoin is the first successful internet money based on peer-to-peer technology; whereby
-                no central bank or authority is involved in the transaction and production of the Bitcoin currency. It
-                was created by an anonymous individual/group under the name, Satoshi Nakamoto. The source code is
-                available publicly as an open source project, anybody can look at it and be part of the developmental
-                process.
-
-                Bitcoin is changing the way we see money as we speak. The idea was to produce a means of exchange,
-                independent of any central authority, that could be transferred electronically in a secure, verifiable
-                and immutable way. It is a decentralized peer-to-peer internet currency making mobile payment easy, very
-                low transaction fees, protects your identity, and it works anywhere all the time with no central
-                authority and banks.
-
-                Bitcoin is designed to have only 21 million BTC ever created, thus making it a deflationary currency.
-                Bitcoin uses the <a href="https://www.coingecko.com/en?hashing_algorithm=SHA-256">SHA-256</a> hashing
-                algorithm with an average transaction confirmation time of 10 minutes. Miners today are mining Bitcoin
-                using ASIC chip dedicated to only mining Bitcoin, and the hash rate has shot up to peta hashes.
-
-                Being the first successful online cryptography currency, Bitcoin has inspired other alternative
-                currencies such as <a href="https://www.coingecko.com/en/coins/litecoin">Litecoin</a>, <a
-                    href="https://www.coingecko.com/en/coins/peercoin">Peercoin</a>, <a
-                    href="https://www.coingecko.com/en/coins/primecoin">Primecoin</a>, and so on.
-
-                The cryptocurrency then took off with the innovation of the turing-complete smart contract by <a
-                    href="https://www.coingecko.com/en/coins/ethereum">Ethereum</a> which led to the development of
-                other amazing projects such as <a href="https://www.coingecko.com/en/coins/eos">EOS</a>, <a
-                    href="https://www.coingecko.com/en/coins/tron">Tron</a>, and even crypto-collectibles such as <a
-                    href="https://www.coingecko.com/buzz/ethereum-still-king-dapps-cryptokitties-need-1-billion-on-eos">CryptoKitties</a>.
+                Loading asset description...
             </p>
-            <div class="error-message" id="coin-info-error">API limit reached. Please try again later.</div>
+            <div class="error-message" id="coin-info-error">API limit reached. Operating in fallbacks.</div>
         </div>
-
 
     </div>
 
+    <!-- Footer -->
     <footer>
-        <p>TechVoids, All Rights Reserved.</p>
+        <p>&copy; 2026 ChartDekho. All Rights Reserved.</p>
         <div class="social-icons">
-            <a href="#"><i class="ri-youtube-line"></i></a>
-            <a href="#"><i class="ri-telegram-line"></i></a>
-            <a href="#"><i class="ri-github-line"></i></a>
-            <a href="#"><i class="ri-discord-line"></i></a>
+            <a href="#" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+            <a href="#" aria-label="Telegram"><i class="ri-telegram-line"></i></a>
+            <a href="#" aria-label="GitHub"><i class="ri-github-line"></i></a>
+            <a href="#" aria-label="Discord"><i class="ri-discord-line"></i></a>
         </div>
     </footer>
 
-    <button onclick="scrollToTop()" id="scrollTop"><i class="ri-arrow-up-s-line"></i></button>
+    <button onclick="scrollToTop()" id="scrollTop" aria-label="Scroll to top"><i class="ri-arrow-up-s-line"></i></button>
 
-
+    <script src="../assets/js/mockData.js"></script>
     <script src="../assets/js/global.js"></script>
     <script src="../assets/js/coin.js"></script>
 </body>

@@ -4,68 +4,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Crypto Marketplace - Live cryptocurrency prices, trending tokens, NFTs, exchanges and advanced real-time charts.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
-    <title>Crypto Marketplace | TechVoids</title>
+    <title>Crypto Marketplace | ChartDekho</title>
 </head>
 
 <body>
 
+    <!-- Fallback / Rate Limit Alert Banner -->
+    <div id="demo-banner" class="demo-banner hidden">
+        <i class="ri-error-warning-line"></i>
+        <span>Notice: CoinGecko API limit reached. Operating in Demo Mode with cached data.</span>
+    </div>
+
+    <!-- Mobile Navigation Overlay Drawer -->
     <div class="overlay">
-        <button id="closeMenu"><i class="ri-close-circle-line"></i></button>
-        <a href="/index.html" class="logo">Logo.</a>
+        <button id="closeMenu" aria-label="Close menu"><i class="ri-close-circle-line"></i></button>
+        <a href="index.html" class="logo"><i class="ri-copper-coin-line"></i> ChartDekho</a>
         <div class="nav-links">
-            <a href="/index.html" class="active">Home</a>
-            <a href="/pages/charts.html">Charts</a>
-            <a href="/pages/search.html">Search</a>
-            <a href="/pages/about.html">About US</a>
+            <a href="index.html" class="active">Home</a>
+            <a href="pages/charts.html">Charts</a>
+            <a href="pages/search.html">Search</a>
+            <a href="pages/about.html">About US</a>
         </div>
 
         <div class="social-icons">
-            <a href="#"><i class="ri-youtube-line"></i></a>
-            <a href="#"><i class="ri-telegram-line"></i></a>
-            <a href="#"><i class="ri-github-line"></i></a>
-            <a href="#"><i class="ri-discord-line"></i></a>
+            <a href="#" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+            <a href="#" aria-label="Telegram"><i class="ri-telegram-line"></i></a>
+            <a href="#" aria-label="GitHub"><i class="ri-github-line"></i></a>
+            <a href="#" aria-label="Discord"><i class="ri-discord-line"></i></a>
         </div>
-
     </div>
 
     <div class="main">
 
+        <!-- Global Market Statistics Ticker -->
         <div class="global">
-            <p>Coins: <b id="coins-count">N/A</b></p>
-            <p>Exchanges: <b id="exchanges-count">N/A</b></p>
-            <p>Market Cap: <span><b id="marketCap">N/A</b> <span id="marketCapChange">N/A <i
-                            class="ri-arrow-down-s-fill"></i></span></span></p>
-            <p>24H Vol: <b id="volume">N/A</b></p>
-            <p>Dominance: <b id="dominance">BTC N/A% - ETH N/A%</b></p>
+            <p><i class="ri-coins-line"></i> Coins: <b id="coins-count">N/A</b></p>
+            <p><i class="ri-exchange-funds-line"></i> Exchanges: <b id="exchanges-count">N/A</b></p>
+            <p><i class="ri-line-chart-line"></i> Market Cap: <span><b id="marketCap">N/A</b> <span id="marketCapChange">N/A <i class="ri-arrow-down-s-fill"></i></span></span></p>
+            <p><i class="ri-funds-line"></i> 24H Vol: <b id="volume">N/A</b></p>
+            <p><i class="ri-pie-chart-line"></i> Dominance: <b id="dominance">BTC N/A% - ETH N/A%</b></p>
         </div>
 
+        <!-- Desktop Navigation Bar -->
         <nav>
             <div class="left-section">
-                <button id="openMenu"><i class="ri-menu-line"></i></button>
-                <a href="/index.html" class="logo">Logo.</a>
+                <button id="openMenu" aria-label="Open menu"><i class="ri-menu-line"></i></button>
+                <a href="index.html" class="logo"><i class="ri-copper-coin-line"></i> ChartDekho.</a>
                 <div class="nav-links">
-                    <a href="/index.html" class="active">Home</a>
-                    <a href="/pages/charts.html">Charts</a>
-                    <a href="/pages/search.html">Search</a>
-                    <a href="/pages/about.html">About US</a>
+                    <a href="index.html" class="active">Home</a>
+                    <a href="pages/charts.html">Charts</a>
+                    <a href="pages/search.html">Search</a>
+                    <a href="pages/about.html">About US</a>
                 </div>
             </div>
             <div class="right-section">
-                <form class="search" id="searchForm">
+                <form class="search" id="searchForm" role="search">
                     <i class="ri-search-line"></i>
-                    <input type="text" id="searchInput" placeholder="Search for an asset..." required
-                        autocomplete="on">
+                    <input type="text" id="searchInput" placeholder="Search asset..." required autocomplete="on">
                 </form>
-                <i id="theme-toggle" class="ri-moon-line"></i>
+                <i id="theme-toggle" class="ri-moon-line" aria-label="Toggle theme"></i>
             </div>
         </nav>
 
+        <!-- Trending Grids Section -->
         <div class="trending">
             <div class="coins-wrapper">
                 <div class="header">
-                    <h3>Trending Coins</h3>
+                    <h3><i class="ri-fire-line" style="color: #FF5722"></i> Trending Coins</h3>
                 </div>
                 <div class="container">
                     <div id="coins-list"></div>
@@ -76,7 +84,7 @@
 
             <div class="nfts-wrapper">
                 <div class="header">
-                    <h3>Trending NFTs</h3>
+                    <h3><i class="ri-nft-line" style="color: #00BCD4"></i> Trending NFTs</h3>
                 </div>
                 <div class="container">
                     <div id="nfts-list"></div>
@@ -84,17 +92,14 @@
                     <div class="error-message" id="nfts-list-error">API limit reached. Please try again later.</div>
                 </div>
             </div>
-
         </div>
 
+        <!-- Interactive Market Tabs Section -->
         <div class="tab-container">
             <div class="tabs">
-                <button class="tab-button active" onclick="openTab(event, 'tab1')"><i class="ri-apps-2-line"></i>
-                    Assets</button>
-                <button class="tab-button" onclick="openTab(event, 'tab2')"><i class="ri-arrow-left-right-line"></i>
-                    Exchanges</button>
-                <button class="tab-button" onclick="openTab(event, 'tab3')"><i class="ri-exchange-2-line"></i>
-                    Categories</button>
+                <button class="tab-button active" onclick="openTab(event, 'tab1')"><i class="ri-apps-2-line"></i> Assets</button>
+                <button class="tab-button" onclick="openTab(event, 'tab2')"><i class="ri-arrow-left-right-line"></i> Exchanges</button>
+                <button class="tab-button" onclick="openTab(event, 'tab3')"><i class="ri-exchange-2-line"></i> Categories</button>
                 <button class="tab-button" onclick="openTab(event, 'tab4')"><i class="ri-btc-line"></i> Holders</button>
             </div>
             <div class="tab-content" id="tab1">
@@ -120,21 +125,23 @@
         </div>
     </div>
 
+    <!-- Page Footer -->
     <footer>
-        <p>TechVoids, All Rights Reserved.</p>
+        <p>&copy; 2026 ChartDekho. All Rights Reserved.</p>
         <div class="social-icons">
-            <a href="#"><i class="ri-youtube-line"></i></a>
-            <a href="#"><i class="ri-telegram-line"></i></a>
-            <a href="#"><i class="ri-github-line"></i></a>
-            <a href="#"><i class="ri-discord-line"></i></a>
+            <a href="#" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+            <a href="#" aria-label="Telegram"><i class="ri-telegram-line"></i></a>
+            <a href="#" aria-label="GitHub"><i class="ri-github-line"></i></a>
+            <a href="#" aria-label="Discord"><i class="ri-discord-line"></i></a>
         </div>
     </footer>
 
-    <button onclick="scrollToTop()" id="scrollTop"><i class="ri-arrow-up-s-line"></i></button>
+    <!-- Smooth Back To Top Button -->
+    <button onclick="scrollToTop()" id="scrollTop" aria-label="Scroll to top"><i class="ri-arrow-up-s-line"></i></button>
 
-
-
+    <!-- Script Assets -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/js/mockData.js"></script>
     <script src="assets/js/global.js"></script>
     <script src="assets/js/script.js"></script>
 </body>

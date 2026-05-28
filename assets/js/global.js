@@ -10,11 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        body.id = savedTheme;
-        updateIcon(savedTheme);
-    }
+    const savedTheme = localStorage.getItem('theme') || 'dark-theme';
+    body.id = savedTheme;
+    updateIcon(savedTheme);
 
     themeToggle.addEventListener('click', () => {
         if (body.id === 'light-theme') {
@@ -30,7 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof initializeWidget === 'function') {
             initializeWidget();
         }
-
     });
 
     function updateIcon(currentTheme) {
@@ -44,32 +41,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const form = document.getElementById('searchForm');
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
+    if (form) {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
 
-        const query = document.getElementById('searchInput').value.trim();
-        if (!query) return;
-
-        window.location.href = `/../../pages/search.html?query=${query}`;
-    });
+            // Route relatively based on folder location
+            const isSubPage = window.location.pathname.includes('/pages/') || window.location.pathname.includes('/pages');
+            const searchPath = isSubPage ? 'search.html' : 'pages/search.html';
+            window.location.href = `${searchPath}?query=${encodeURIComponent(query)}`;
+        });
+    }
 
     const openMenuBtn = document.getElementById('openMenu');
     const overlay = document.querySelector('.overlay');
     const closeMenuBtn = document.getElementById('closeMenu');
 
-    openMenuBtn.addEventListener('click', () => {
-        overlay.classList.add('show');
-    });
+    if (openMenuBtn && overlay && closeMenuBtn) {
+        openMenuBtn.addEventListener('click', () => {
+            overlay.classList.add('show');
+        });
 
-    closeMenuBtn.addEventListener('click', () => {
-        overlay.classList.remove('show');
-    });
-
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
+        closeMenuBtn.addEventListener('click', () => {
             overlay.classList.remove('show');
-        }
-    });
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('show');
+            }
+        });
+    }
 
     fetchGlobal();
 });
@@ -78,13 +81,19 @@ function getLocalStorageData(key) {
     const storedData = localStorage.getItem(key);
     if (!storedData) return null;
 
-    const parsedData = JSON.parse(storedData);
-    const currentTime = Date.now();
-    if (currentTime - parsedData.timestamp > 300000) {
+    try {
+        const parsedData = JSON.parse(storedData);
+        const currentTime = Date.now();
+        // Cache limit: 5 minutes (300,000ms)
+        if (currentTime - parsedData.timestamp > 300000) {
+            localStorage.removeItem(key);
+            return null;
+        }
+        return parsedData.data;
+    } catch (e) {
         localStorage.removeItem(key);
         return null;
     }
-    return parsedData.data;
 }
 
 function setLocalStorageData(key, data) {
@@ -105,44 +114,74 @@ function fetchGlobal() {
         const options = { method: 'GET', headers: { accept: 'application/json' } };
 
         fetch('https://api.coingecko.com/api/v3/global', options)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error(`Global stats API error: ${response.status}`);
+                return response.json();
+            })
             .then(data => {
                 const globalData = data.data;
-                displayGlobalData(data);
+                displayGlobalData(globalData);
                 setLocalStorageData(localStorageKey, globalData);
             })
             .catch(error => {
-                coinsCount.textContent = 'N/A';
-                exchangesCount.textContent = 'N/A';
-                marketCap.textContent = 'N/A';
-                marketCapChangeElement.textContent = 'N/A';
-                volume.textContent = 'N/A';
-                dominance.textContent = 'BTC N/A% - ETH N/A%';
-                console.error(error);
+                console.warn("Global stats API fail. Using fallback data.", error);
+                
+                // Show floating warning banner if API limits hit
+                const banner = document.getElementById('demo-banner');
+                if (banner) {
+                    banner.classList.remove('hidden');
+                }
+
+                if (window.MOCK_DATA && window.MOCK_DATA.global) {
+                    displayGlobalData(window.MOCK_DATA.global.data);
+                } else {
+                    if (coinsCount) coinsCount.textContent = 'N/A';
+                    if (exchangesCount) exchangesCount.textContent = 'N/A';
+                    if (marketCap) marketCap.textContent = 'N/A';
+                    if (marketCapChangeElement) marketCapChangeElement.textContent = 'N/A';
+                    if (volume) volume.textContent = 'N/A';
+                    if (dominance) dominance.textContent = 'BTC N/A% - ETH N/A%';
+                }
             });
     }
 }
 
 function displayGlobalData(globalData) {
-    coinsCount.textContent = globalData.active_cryptocurrencies || 'N/A';
-    exchangesCount.textContent = globalData.markets || 'N/A';
+    if (!globalData) return;
+    if (coinsCount) coinsCount.textContent = (globalData.active_cryptocurrencies || 'N/A').toLocaleString();
+    if (exchangesCount) exchangesCount.textContent = (globalData.markets || 'N/A').toLocaleString();
 
-    marketCap.textContent = globalData.total_market_cap?.usd ? `$${(globalData.total_market_cap.usd / 1e12).toFixed(3)}T` : 'N/A';
+    if (marketCap) {
+        marketCap.textContent = globalData.total_market_cap?.usd 
+            ? `$${(globalData.total_market_cap.usd / 1e12).toFixed(3)}T` 
+            : 'N/A';
+    }
+    
     const marketCapChange = globalData.market_cap_change_percentage_24h_usd;
-
-    if (marketCapChange !== undefined) {
-        const changeText = `${marketCapChange.toFixed(1)}%`;
-        marketCapChangeElement.innerHTML = `${changeText} <i class="${marketCapChange < 0 ? 'red' : 'green'} ri-arrow-${marketCapChange < 0 ? 'down' : 'up'}-s-fill"></i>`;
-        marketCapChangeElement.style.color = marketCapChange < 0 ? 'red' : 'green';
-    } else {
-        marketCapChangeElement.textContent = 'N/A';
+    if (marketCapChangeElement) {
+        if (marketCapChange !== undefined && marketCapChange !== null) {
+            const isPositive = marketCapChange >= 0;
+            const changeText = `${marketCapChange.toFixed(1)}%`;
+            const colorClass = isPositive ? 'green' : 'red';
+            const arrowClass = isPositive ? 'up' : 'down';
+            marketCapChangeElement.innerHTML = `${changeText} <i class="${colorClass} ri-arrow-${arrowClass}-s-fill"></i>`;
+            marketCapChangeElement.className = colorClass;
+        } else {
+            marketCapChangeElement.textContent = 'N/A';
+        }
     }
 
-    volume.textContent = globalData.total_volume?.usd ? `$${(globalData.total_volume.usd / 1e9).toFixed(3)}B` : 'N/A';
+    if (volume) {
+        volume.textContent = globalData.total_volume?.usd 
+            ? `$${(globalData.total_volume.usd / 1e9).toFixed(3)}B` 
+            : 'N/A';
+    }
 
-    const btcDominance = globalData.market_cap_percentage?.btc ? `${globalData.market_cap_percentage.btc.toFixed(1)}%` : 'N/A';
-    const ethDominance = globalData.market_cap_percentage?.eth ? `${globalData.market_cap_percentage.eth.toFixed(1)}%` : 'N/A';
-    dominance.textContent = `BTC ${btcDominance} - ETH ${ethDominance}`;
+    if (dominance) {
+        const btcDominance = globalData.market_cap_percentage?.btc ? `${globalData.market_cap_percentage.btc.toFixed(1)}%` : 'N/A';
+        const ethDominance = globalData.market_cap_percentage?.eth ? `${globalData.market_cap_percentage.eth.toFixed(1)}%` : 'N/A';
+        dominance.textContent = `BTC ${btcDominance} - ETH ${ethDominance}`;
+    }
 }
 
 function toggleSpinner(listId, spinnerId, show) {
@@ -173,12 +212,24 @@ function createTable(headers, fixedIndex = 0) {
     });
     thead.appendChild(headerRow);
 
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+
+    // Patch appendChild to append to tbody if it exists
+    table.appendChild = function(child) {
+        if (child.tagName === 'TR') {
+            tbody.appendChild(child);
+        } else {
+            HTMLTableElement.prototype.appendChild.call(this, child);
+        }
+    };
+
     return table;
 }
 
 function createWidget(containerId, widgetConfig, widgetSrc) {
     const container = document.getElementById(containerId);
-
+    if (!container) return;
     container.innerHTML = '';
 
     const widgetDiv = document.createElement('div');
@@ -206,6 +257,7 @@ window.onscroll = () => {
 }
 
 function scrollFunction() {
+    if (!scrollTopBtn) return;
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
         scrollTopBtn.style.display = "flex";
     } else {
@@ -214,8 +266,6 @@ function scrollFunction() {
 }
 
 function scrollToTop() {
-    // For Safari
-    document.body.scrollTop = 0;
-    // Chrome, Firefox, IE and Opera
-    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0; // For Safari
+    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 }
