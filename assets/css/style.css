@@ -1233,3 +1233,38 @@ footer .social-icons a i,
         text-align: center;
     }
 }
+
+/* Extra small mobile styles */
+@media screen and (max-width: 576px) {
+    nav {
+        padding: 12px 16px;
+    }
+    nav .right-section {
+        width: auto;
+        min-width: 0;
+        flex-grow: 1;
+        justify-content: flex-end;
+    }
+    nav .right-section .search {
+        display: none;
+    }
+    .trending, .tab-container, .coin-container, .coin-desc {
+        margin: 16px 12px;
+    }
+    .coin-desc {
+        padding: 16px;
+    }
+    .chart-container {
+        margin: 16px 12px;
+        height: 380px;
+    }
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+    }
+    .about-container {
+        padding: 20px 16px;
+    }
+}
