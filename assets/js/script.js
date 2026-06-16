@@ -192,7 +192,7 @@ function displayAssets(data) {
     const cryptoList = document.getElementById('asset-list');
     if (!cryptoList) return;
     cryptoList.innerHTML = '';
-    const table = createTable(['Rank', 'Coin', 'Price', '24h Price', '24h Price %', 'Total Vol', 'Market Cap', 'Last 7 Days'], 1);
+    const table = createTable(['Pin', 'Rank', 'Coin', 'Price', '24h Price', '24h Price %', 'Total Vol', 'Market Cap', 'Last 7 Days'], 2);
 
     const sparklineData = [];
     data.forEach(asset => {
@@ -201,8 +201,17 @@ function displayAssets(data) {
         const isPositive = changePercent >= 0;
         const changeClass = isPositive ? 'green' : 'red';
         const arrow = isPositive ? 'ri-arrow-up-s-fill' : 'ri-arrow-down-s-fill';
+        
+        const isPinned = pinnedCoins.some(c => c.id === asset.id);
+        const sparklineArr = (asset.sparkline_in_7d && asset.sparkline_in_7d.price) ? asset.sparkline_in_7d.price : [];
+        const sparklineJSON = JSON.stringify(sparklineArr);
 
         row.innerHTML = `
+            <td onclick="event.stopPropagation(); togglePin('${asset.id}', '${asset.name.replace(/'/g, "\\'")}', '${asset.symbol}', '${asset.image}', ${asset.current_price}, ${changePercent || 0}, ${sparklineJSON})">
+                <button class="pin-row-btn ${isPinned ? 'pinned' : ''}" title="Pin asset" style="cursor:pointer;">
+                    <i class="${isPinned ? 'ri-bookmark-3-fill' : 'ri-bookmark-3-line'}"></i>
+                </button>
+            </td>
             <td class="rank">${asset.market_cap_rank}</td>
             <td class="name-column table-fixed-column"><img src="${asset.image}" alt="${asset.name}"> ${asset.name} <span>(${asset.symbol.toUpperCase()})</span></td>
             <td>$${asset.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -340,3 +349,203 @@ function displayCompanies(data) {
     });
     companyList.appendChild(table);
 }
+
+// ==========================================================
+//  Pinned Watchlist & Compare Modal Scripts
+// ==========================================================
+let pinnedCoins = JSON.parse(localStorage.getItem("pinned_coins")) || [];
+
+function savePinnedCoins() {
+    localStorage.setItem("pinned_coins", JSON.stringify(pinnedCoins));
+    renderPinnedWatchlist();
+    populateCompareDropdowns();
+}
+
+function renderPinnedWatchlist() {
+    const section = document.getElementById("pinned-watchlist-section");
+    const container = document.getElementById("pinned-assets-list");
+    if (!section || !container) return;
+    
+    if (pinnedCoins.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+    
+    section.classList.remove("hidden");
+    container.innerHTML = pinnedCoins.map(coin => {
+        const isPositive = coin.change >= 0;
+        const changeClass = isPositive ? 'up' : 'down';
+        const sign = isPositive ? '+' : '';
+        return `
+            <div class="pinned-card" onclick="window.location.href = 'pages/coin.html?coin=${coin.id}'">
+                <img src="${coin.image}" alt="${coin.name}">
+                <div class="pinned-card-info">
+                    <span class="pinned-card-name">${coin.name} <span style="font-size:0.68rem; opacity:0.6;">(${coin.symbol.toUpperCase()})</span></span>
+                    <span class="pinned-card-price">$${coin.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span class="pinned-card-change ${changeClass}">${sign}${coin.change.toFixed(2)}%</span>
+                </div>
+                <button class="pin-row-btn pinned" onclick="event.stopPropagation(); unpinCoin('${coin.id}')" title="Unpin coin" style="margin-left:auto;">
+                    <i class="ri-bookmark-3-fill"></i>
+                </button>
+            </div>
+        `;
+    }).join("");
+}
+
+function togglePin(id, name, symbol, image, price, change, sparkline) {
+    const idx = pinnedCoins.findIndex(c => c.id === id);
+    if (idx > -1) {
+        pinnedCoins.splice(idx, 1);
+    } else {
+        pinnedCoins.push({ id, name, symbol, image, price, change, sparkline });
+    }
+    savePinnedCoins();
+    
+    // Update matching button in main table if visible
+    const tdEl = document.querySelector(`td[onclick*="${id}"]`);
+    if (tdEl) {
+        const btn = tdEl.querySelector("button");
+        if (btn) {
+            const isPinned = pinnedCoins.some(c => c.id === id);
+            btn.className = `pin-row-btn ${isPinned ? 'pinned' : ''}`;
+            btn.querySelector("i").className = isPinned ? 'ri-bookmark-3-fill' : 'ri-bookmark-3-line';
+        }
+    }
+}
+
+function unpinCoin(id) {
+    pinnedCoins = pinnedCoins.filter(c => c.id !== id);
+    savePinnedCoins();
+    
+    // Update matching button in main table if visible
+    const tdEl = document.querySelector(`td[onclick*="${id}"]`);
+    if (tdEl) {
+        const btn = tdEl.querySelector("button");
+        if (btn) {
+            btn.className = `pin-row-btn`;
+            btn.querySelector("i").className = 'ri-bookmark-3-line';
+        }
+    }
+}
+
+let compareChartInstance = null;
+
+function populateCompareDropdowns() {
+    const select1 = document.getElementById("compare-select-1");
+    const select2 = document.getElementById("compare-select-2");
+    if (!select1 || !select2) return;
+    
+    const options = pinnedCoins.map(coin => `<option value="${coin.id}">${coin.name} (${coin.symbol.toUpperCase()})</option>`).join("");
+    select1.innerHTML = options;
+    select2.innerHTML = options;
+    
+    if (pinnedCoins.length >= 2) {
+        select2.selectedIndex = 1;
+    }
+}
+
+function openCompareModal() {
+    if (pinnedCoins.length === 0) {
+        alert('Pin at least one coin to compare!');
+        return;
+    }
+    populateCompareDropdowns();
+    document.getElementById("compare-modal").style.display = "flex";
+    updateCompareChart();
+}
+
+function closeCompareModal() {
+    document.getElementById("compare-modal").style.display = "none";
+}
+
+function updateCompareChart() {
+    const id1 = document.getElementById("compare-select-1").value;
+    const id2 = document.getElementById("compare-select-2").value;
+    
+    const coin1 = pinnedCoins.find(c => c.id === id1);
+    const coin2 = pinnedCoins.find(c => c.id === id2);
+    
+    if (!coin1 || !coin2) return;
+    
+    const canvas = document.getElementById("compareChart");
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext("2d");
+    
+    if (compareChartInstance) {
+        compareChartInstance.destroy();
+    }
+    
+    // Normalize datasets relative to first element for logical visual scaling comparison
+    const normalize = (data) => {
+        const start = data[0] || 1;
+        return data.map(val => ((val - start) / start) * 100);
+    };
+    
+    compareChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: coin1.sparkline.map((_, i) => i),
+            datasets: [
+                {
+                    label: coin1.name,
+                    data: normalize(coin1.sparkline),
+                    borderColor: '#10B981',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.4
+                },
+                {
+                    label: coin2.name,
+                    data: normalize(coin2.sparkline),
+                    borderColor: '#EF4444',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 10 } }
+                }
+            },
+            scales: {
+                x: { display: false },
+                y: {
+                    ticks: {
+                        color: '#94a3b8',
+                        font: { family: 'Plus Jakarta Sans', size: 9 },
+                        callback: function(value) { return value.toFixed(1) + '%'; }
+                    },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                }
+            }
+        }
+    });
+}
+
+// Attach compare dropdown event listeners
+document.addEventListener("DOMContentLoaded", () => {
+    const s1 = document.getElementById("compare-select-1");
+    const s2 = document.getElementById("compare-select-2");
+    if (s1) s1.addEventListener("change", updateCompareChart);
+    if (s2) s2.addEventListener("change", updateCompareChart);
+    
+    // Initial Pinned watchlist render
+    renderPinnedWatchlist();
+});
+
+// Bind methods globally
+window.togglePin = togglePin;
+window.unpinCoin = unpinCoin;
+window.openCompareModal = openCompareModal;
+window.closeCompareModal = closeCompareModal;
+window.updateCompareChart = updateCompareChart;
+window.pinnedCoins = pinnedCoins;

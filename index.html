@@ -76,6 +76,15 @@
             </div>
         </nav>
 
+        <!-- Pinned Watchlist Section -->
+        <div id="pinned-watchlist-section" class="pinned-watchlist-section hidden" style="padding: 1.5rem 2.5rem 0 2.5rem;">
+            <div class="header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:8px;">
+                <h3 style="font-size:1.15rem; font-weight:600;"><i class="ri-bookmark-3-fill" style="color: #F59E0B"></i> Pinned Watchlist</h3>
+                <button id="compare-sparklines-btn" class="tab-button" onclick="openCompareModal()" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; display:flex; align-items:center; gap:6px;"><i class="ri-line-chart-line"></i> Compare Sparklines</button>
+            </div>
+            <div id="pinned-assets-list" class="pinned-assets-list" style="display:flex; flex-wrap:wrap; gap:12px; min-height:50px;"></div>
+        </div>
+
         <!-- Trending Grids Section -->
         <div class="trending">
             <div class="coins-wrapper">
@@ -149,6 +158,26 @@
     <!-- Smooth Back To Top Button -->
     <button onclick="scrollToTop()" id="scrollTop" aria-label="Scroll to top"><i
             class="ri-arrow-up-s-line"></i></button>
+
+    <!-- Compare Sparklines Modal -->
+    <div id="compare-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:999; justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:#131a26; border:1px solid rgba(255,255,255,0.08); border-radius:12px; width:90%; max-width:550px; padding:20px; box-shadow:0 15px 30px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:10px;">
+                <h3 style="font-size:1.15rem; font-weight:600; color:#fff;"><i class="ri-line-chart-line" style="color:var(--accent-color, #6366f1)"></i> Compare Asset Sparklines</h3>
+                <span class="close-modal" onclick="closeCompareModal()" style="font-size:1.5rem; cursor:pointer; color:#94a3b8;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="compare-selectors" style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:20px;">
+                    <select id="compare-select-1" class="compare-select" style="background:#1c2533; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:6px 12px; border-radius:6px; outline:none; font-size:0.88rem; width:45%;"></select>
+                    <span class="vs-text" style="font-weight:700; color:#cbd5e1; font-size:0.8rem;">VS</span>
+                    <select id="compare-select-2" class="compare-select" style="background:#1c2533; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:6px 12px; border-radius:6px; outline:none; font-size:0.88rem; width:45%;"></select>
+                </div>
+                <div class="chart-container" style="position: relative; height:220px; width:100%;">
+                    <canvas id="compareChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Script Assets -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
